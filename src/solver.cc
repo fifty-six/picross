@@ -1,7 +1,6 @@
 #include <cassert>
 #include <optional>
 
-#include "main.h"
 #include "solver.h"
 
 #include "fmt/format.h"
@@ -22,7 +21,7 @@ auto solve(Constraints &c) -> std::optional<vec<u32>> {
     return board;
 }
 
-auto print_board(vec<u32> &board) -> void {
+void print_board(vec<u32> &board) {
     auto fmt_string = fmt::format("{{:0{}b}}", board.size());
 
     fmt::print("\n");
