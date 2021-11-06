@@ -7,6 +7,8 @@
 #include "fmt/format.h"
 #include "fmt/ranges.h"
 
+namespace picross {
+
 auto solve(Constraints &c) -> std::optional<vec<u32>> {
     vec<u32> board(c.size);
 
@@ -24,7 +26,7 @@ auto print_board(vec<u32> &board) -> void {
     auto fmt_string = fmt::format("{{:0{}b}}", board.size());
 
     fmt::print("\n");
-    for (auto row : board) {
+    for (auto row: board) {
         std::string line = fmt::vformat(fmt_string, fmt::make_format_args(row));
         std::reverse(line.begin(), line.end());
         fmt::print("{}\n", line);
@@ -33,10 +35,10 @@ auto print_board(vec<u32> &board) -> void {
 }
 
 auto check_cols(Constraints &c, vec<u32> &board, pos_t current) -> bool {
-    auto [cur_row, cur_constraint] = current;
+    auto[cur_row, cur_constraint] = current;
 
     assert (cur_row <= board.size());
-    
+
     // for now
     if (cur_row != board.size()) {
         return true;
@@ -51,7 +53,7 @@ auto check_cols(Constraints &c, vec<u32> &board, pos_t current) -> bool {
         for (u32 row: board) {
             col |= (row & (1 << i)) >> i << n++;
         }
-        
+
         auto col_c = c.cols[i];
 
         for (auto constraint: col_c) {
@@ -125,7 +127,7 @@ auto solve(Constraints &c, vec<u32> &possibles, vec<u32> &board, pos_t current) 
         u32 bit = row_pos & (~row_pos + 1);
 
         // the block
-        u32 block = ((bit << constraint) - 1) & ~(bit - 1) | bit;
+        u32 block = (((bit << constraint) - 1) & ~(bit - 1)) | bit;
 
         // If the block we're trying to place at the 
         // first row possibility doesn't work, then
@@ -160,7 +162,7 @@ auto solve(Constraints &c, vec<u32> &possibles, vec<u32> &board, pos_t current) 
         // as we only rule out the bit as the start.
         row_pos = pos;
         row_pos ^= bit;
-    };
+    }
 
     // We have to restore this despite changing our
     // possibilities back on recursive call
@@ -175,3 +177,4 @@ auto solve(Constraints &c, vec<u32> &possibles, vec<u32> &board, pos_t current) 
     return false;
 }
 
+}

@@ -55,8 +55,11 @@ if is_mode("debug") then
 end
 
 if is_mode("release") then
-    add_cxflags("-fomit-frame-pointer")
     add_defines("NDEBUG")
+
+    add_cxflags("-fomit-frame-pointer")
+    add_cxflags("-march=native")
+
     set_optimize("fastest")
 end
 

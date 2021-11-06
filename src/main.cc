@@ -2,14 +2,9 @@
 #include <span>
 #include <cstring>
 #include <vector>
-#include <cassert>
 #include <fstream>
-#include <charconv>
 #include <sstream>
-#include <optional>
 #include <chrono>
-
-#include "tl/expected.hpp"
 
 #include <fmt/core.h>
 #include <fmt/compile.h>
@@ -17,22 +12,12 @@
 #include <fmt/chrono.h>
 #include <fmt/ranges.h>
 
-#include "main.h"
+#include "aliases.h"
 #include "solver.h"
 
-using u32 = uint32_t;
-
-Constraints::Constraints(
-        size_t size,
-        std::vector<std::vector<int>> &&rows_,
-        std::vector<std::vector<int>> &&cols_
-)
-        : size(size), rows(rows_), cols(cols_) {
-    assert(rows.size() == static_cast<size_t>(size));
-    assert(cols.size() == static_cast<size_t>(size));
-}
-
 int main(int argc, char **argv) {
+    using namespace picross;
+    
     std::span args { argv, static_cast<size_t>(argc) };
 
     if (args.size() > 2) {
@@ -111,70 +96,4 @@ int main(int argc, char **argv) {
     }
 
     return 0;
-}
-
-expected<Constraints, std::string> read_file(std::string const &name) {
-    std::ifstream file;
-
-    file.open(name);
-
-    if (!file)
-        return unexpected(std::string("File not found!"));
-
-    size_t size;
-
-    file >> size;
-
-    vec<vec<int>> rows;
-    vec<vec<int>> cols;
-
-    rows.reserve(size);
-    cols.reserve(size);
-
-    std::string line;
-    size_t n = 0;
-
-    // After the number it's just going to be \n I think
-    std::getline(file, line, '\n');
-
-    while (file.good()) {
-        // Read n of size for rows, then cols.
-        vec<vec<int>> &current = n >= size
-                                 ? cols
-                                 : rows;
-
-        // Line
-        std::getline(file, line, '\n');
-
-        if (line.empty())
-            continue;
-
-        std::stringstream l_stream(line);
-
-        vec<int> line_vec;
-        std::string num;
-
-        // Process line for our row/col constraints
-        while (l_stream.good()) {
-            std::getline(l_stream, num, ' ');
-
-            size_t res;
-
-            auto[ptr, ec] = std::from_chars(num.data(), num.data() + num.size(), res);
-
-            if (ec != std::errc()) {
-                return unexpected(fmt::format("{} while parsing {}", std::make_error_code(ec).message(), num));
-            }
-
-            line_vec.push_back(static_cast<int>(res));
-        }
-
-        current.push_back(std::move(line_vec));
-
-        ++n;
-    }
-
-    fmt::print("{}, {}\n", rows, cols);
-
-    return Constraints { size, std::move(rows), std::move(cols) };
 }
