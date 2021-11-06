@@ -65,7 +65,7 @@ target("picross")
     set_kind("binary")
 
     add_headerfiles("src/*.h")
-    add_files("src/*.cpp")
+    add_files("src/*.cc")
 
     add_packages("fmt")
     add_packages("tl_expected")
