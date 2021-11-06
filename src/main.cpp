@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 
     fmt::print("Rows: {}\n", constraints.value().rows);
     fmt::print("Columns: {}\n", constraints.value().cols);
-    
+
     // vec<u32> board = {
     //         0b001,
     //         0b11111,
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
     //         0b111111110111,
     //         0b110011111111
     // };
-    
+
     // vec<u32> board =  {
     //         // 0b10011,
     //         // 0b11010,
@@ -83,22 +83,24 @@ int main(int argc, char **argv) {
     //         0b10011,
     //         0b11110
     // };
-    
+
     // fmt::print("{}\n", check_cols(*constraints, board, { 5, 1 }));
-    
+
     auto start = std::chrono::steady_clock::now();
-    
     auto board = solve(*constraints);
+    auto end = std::chrono::steady_clock::now();
     
-    auto elapsed = std::chrono::steady_clock::now() - start;
-    fmt::print("Elapsed time: {:%S}s\n", elapsed);
+    fmt::print(
+            "Elapsed time: {}\n",
+            std::chrono::duration_cast<std::chrono::nanoseconds>(end - start)
+    );
 
     if (board) {
         fmt::print("Found solution!\n");
-        
+
         auto fmt_string = fmt::format("{{:0{}b}}", board->size());
-        
-        for (auto row : *board) {
+
+        for (auto row: *board) {
             std::string line = fmt::vformat(fmt_string, fmt::make_format_args(row));
             std::reverse(line.begin(), line.end());
             fmt::print("{}\n", line);
@@ -143,7 +145,7 @@ expected<Constraints, std::string> read_file(std::string const &name) {
 
         // Line
         std::getline(file, line, '\n');
-        
+
         if (line.empty())
             continue;
 
@@ -155,23 +157,23 @@ expected<Constraints, std::string> read_file(std::string const &name) {
         // Process line for our row/col constraints
         while (l_stream.good()) {
             std::getline(l_stream, num, ' ');
-            
+
             size_t res;
-            
-            auto [ptr, ec] = std::from_chars(num.data(), num.data() + num.size(), res);
-            
+
+            auto[ptr, ec] = std::from_chars(num.data(), num.data() + num.size(), res);
+
             if (ec != std::errc()) {
                 return unexpected(fmt::format("{} while parsing {}", std::make_error_code(ec).message(), num));
             }
-            
+
             line_vec.push_back(static_cast<int>(res));
         }
 
         current.push_back(std::move(line_vec));
-        
+
         ++n;
     }
-    
+
     fmt::print("{}, {}\n", rows, cols);
 
     return Constraints { size, std::move(rows), std::move(cols) };

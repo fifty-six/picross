@@ -125,26 +125,12 @@ auto solve(Constraints &c, vec<u32> &possibles, vec<u32> &board, pos_t current) 
         u32 bit = row_pos & (~row_pos + 1);
 
         // the block
-        u32 block = bit;
-
-        // Does our block fit?
-        // Might be equivalent to i | (i - (i >> (n - 1)))
-        // But I need to check OOB, so for now this is easier.
-        auto do_block = [&]() -> bool {
-            for (int i = 1; i < constraint; i++) {
-                block |= bit << i;
-
-                if ((bit << i) >= max)
-                    return false;
-            }
-
-            return true;
-        };
+        u32 block = ((bit << constraint) - 1) & ~(bit - 1) | bit;
 
         // If the block we're trying to place at the 
         // first row possibility doesn't work, then
         // we lose, restore the original possibilities.
-        if (!do_block()) {
+        if (block >= max) {
             row_pos = orig_pos;
             assert(board[row] == orig_row);
             return false;
@@ -159,7 +145,7 @@ auto solve(Constraints &c, vec<u32> &possibles, vec<u32> &board, pos_t current) 
 
         auto pos = row_pos;
 
-        // shift it over 1 so they stay non-contiguous regions
+        // Shift it over 1 so they stay non-contiguous regions
         row_pos &= ~((block << 1) | block);
         board[row] |= block;
 
@@ -169,16 +155,20 @@ auto solve(Constraints &c, vec<u32> &possibles, vec<u32> &board, pos_t current) 
 
         board[row] &= ~block;
 
-        // restore the possibilities and then
+        // Restore the possibilities and then
         // remove the bit instead of the entire block
-        // as we only rule out the bit as the start
+        // as we only rule out the bit as the start.
         row_pos = pos;
         row_pos ^= bit;
     };
 
-    assert(board[row] == orig_row);
-
+    // We have to restore this despite changing our
+    // possibilities back on recursive call
+    // because we could've gone forwards a row.
     row_pos = orig_pos;
+
+    // This should be unnecessary, but safety is nice.
+    assert(board[row] == orig_row);
     board[row] = orig_row;
 
     // Exhausted our possibilities.
