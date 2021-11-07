@@ -44,23 +44,26 @@ int main(int argc, char **argv) {
     }
 
     fmt::print("Rows: {}\n", constraints.value().rows);
-    fmt::print("Columns: {}\n", constraints.value().cols);
+    fmt::print("Columns: {}\n\n", constraints.value().cols);
 
     auto start = std::chrono::steady_clock::now();
     auto board = solve(*constraints);
     auto end = std::chrono::steady_clock::now();
 
-    fmt::print(
-            "Elapsed time: {}\n",
-            std::chrono::duration_cast<std::chrono::nanoseconds>(end - start)
-    );
-
     if (board) {
-        fmt::print("Found solution!\n");
+        fmt::print(fg(fmt::color::light_green) | fmt::emphasis::bold, "Found solution!\n");
         print_board(*constraints, *board);
     } else {
         fmt::print(fg(fmt::color::crimson) | fmt::emphasis::bold, "No solution found. :(\n");
     }
+    
+    fmt::print("Elapsed time: ");
+    
+    fmt::print(
+            fg(fmt::color::light_blue) | fmt::emphasis::bold,
+            "{}\n",
+            std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+    );
 
     return 0;
 }
