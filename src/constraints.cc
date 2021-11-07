@@ -17,13 +17,14 @@
 namespace picross {
 
 Constraints::Constraints(
-        size_t size,
+        u32 row_count_,
+        u32 col_count_,
         vec<vec<u32>> &&rows_,
         vec<vec<u32>> &&cols_
 )
-        : size(size), rows(rows_), cols(cols_) {
-    assert(rows.size() == static_cast<size_t>(size));
-    assert(cols.size() == static_cast<size_t>(size));
+        : row_count(row_count_), col_count(col_count_), rows(rows_), cols(cols_) {
+    assert(rows.size() == static_cast<size_t>(row_size));
+    assert(cols.size() == static_cast<size_t>(col_size));
 }
 
 tl::expected<Constraints, std::string> read_file(std::string const &name) {
@@ -34,15 +35,16 @@ tl::expected<Constraints, std::string> read_file(std::string const &name) {
     if (!file)
         return tl::unexpected(std::string("File not found!"));
 
-    size_t size;
+    u32 row_count, col_count;
 
-    file >> size;
-
+    file >> row_count;
+    file >> col_count;
+    
     vec<vec<u32>> rows;
     vec<vec<u32>> cols;
 
-    rows.reserve(size);
-    cols.reserve(size);
+    rows.reserve(row_count);
+    cols.reserve(col_count);
 
     std::string line;
     size_t n = 0;
@@ -52,7 +54,7 @@ tl::expected<Constraints, std::string> read_file(std::string const &name) {
 
     while (file.good()) {
         // Read n of size for rows, then cols.
-        vec<vec<u32>> &current = n >= size
+        vec<vec<u32>> &current = n >= row_count
                                  ? cols
                                  : rows;
 
@@ -78,8 +80,10 @@ tl::expected<Constraints, std::string> read_file(std::string const &name) {
             if (ec != std::errc()) {
                 return tl::unexpected(fmt::format("{} while parsing \"{}\"", std::make_error_code(ec).message(), num));
             }
-
-            line_vec.push_back(res);
+            
+            // 0 means empty, i.e. no constraint
+            if (res != 0)
+                line_vec.push_back(res);
         }
 
         current.push_back(std::move(line_vec));
@@ -87,7 +91,7 @@ tl::expected<Constraints, std::string> read_file(std::string const &name) {
         ++n;
     }
 
-    return Constraints { size, std::move(rows), std::move(cols) };
+    return Constraints { row_count, col_count, std::move(rows), std::move(cols) };
 }
 
 }

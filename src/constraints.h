@@ -8,11 +8,12 @@
 namespace picross {
 
 struct Constraints {
-    size_t size;
+    u32 row_count;
+    u32 col_count;
     vec<vec<u32>> rows;
     vec<vec<u32>> cols;
 
-    explicit Constraints(size_t size, vec<vec<u32>> &&rows, vec<vec<u32>> &&cols);
+    explicit Constraints(u32 row_count, u32 col_count, vec<vec<u32>> &&rows, vec<vec<u32>> &&cols);
 };
 
 tl::expected<Constraints, std::string> read_file(std::string const &name);

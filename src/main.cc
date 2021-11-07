@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 
     if (board) {
         fmt::print("Found solution!\n");
-        print_board(*board);
+        print_board(*constraints, *board);
     } else {
         fmt::print(fg(fmt::color::crimson) | fmt::emphasis::bold, "No solution found. :(\n");
     }
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 void test_cols() {
     {
         picross::Constraints constraints {
-                5,
+                5, 5,
                 {{ 2, 2 }, { 3 }, { 1, 1 }, { 1, 1 }, { 1, 1 }},
                 {{ 4 }, { 2, 1 }, { 2 }, { 1 }, { 1, 2 }}
         };
@@ -88,7 +88,7 @@ void test_cols() {
 
     {
         picross::Constraints constraints {
-                10,
+                10, 10,
                 {{ 2, 2 }, { 1, 1, 1 }, { 1, 4, 1 }, { 1, 1, 4 }, { 2, 2, 1 }, { 1, 2, 2, 1 }, { 3, 2 }, { 1, 3, 2 }, { 2, 1, 2 }, { 3, 1, 1, 1 }},
                 {{ 3, 3 }, { 3, 2 }, { 1, 2, 1 }, { 2, 3 }, { 1, 1, 1, 1, 1 }, { 1, 1, 1 }, { 5, 2 }, { 1, 3 }, { 1, 1, 3 }, { 6, 2 }}
         };
@@ -110,7 +110,7 @@ void test_cols() {
     }
     {
         picross::Constraints constraints {
-                10,
+                10, 10,
                 {{ 2, 3, 1 }, { 2, 1, 1 }, { 2, 2, 3 }, { 3, 3 }, { 1, 5, 1 }, { 2, 6 }, { 1, 3, 1 }, { 1, 1, 1, 1 }, { 1, 1, 2, 1 }, { 2, 1, 1, 1 }},
                 {{ 2, 2, 3 }, { 4, 2, 1 }, { 1, 1, 1 }, { 1, 4, 1 }, { 1, 4 }, { 1, 1, 3, 1 }, { 1, 3, 2 }, { 6, 1 }, { 2, 2, 1 }, { 1, 1, 1, 2 }}
         };

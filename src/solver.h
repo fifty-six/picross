@@ -6,7 +6,7 @@
 
 namespace picross {
 
-void print_board(vec<u32> &board);
+void print_board(Constraints &c, vec<u32> &board);
     
 auto check_cols(Constraints &c, vec<u32> &board, pos_t current) -> bool;
 

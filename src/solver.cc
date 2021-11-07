@@ -8,11 +8,11 @@
 namespace picross {
 
 auto solve(Constraints &c) -> std::optional<vec<u32>> {
-    vec<u32> board(c.size);
+    vec<u32> board(c.row_count);
 
-    vec<u32> possibles(c.size);
-    for (size_t i = 0; i < c.size; i++)
-        possibles[i] = (1 << c.size) - 1;
+    vec<u32> possibles(c.row_count);
+    for (size_t i = 0; i < c.row_count; i++)
+        possibles[i] = (1 << c.col_count) - 1;
 
     if (!solve(c, possibles, board, { 0, 0 }))
         return std::nullopt;
@@ -20,8 +20,8 @@ auto solve(Constraints &c) -> std::optional<vec<u32>> {
     return board;
 }
 
-void print_board(vec<u32> &board) {
-    auto fmt_string = fmt::format("{{:0{}b}}", board.size());
+void print_board(Constraints &c, vec<u32> &board) {
+    auto fmt_string = fmt::format("{{:0{}b}}", c.col_count);
 
     fmt::print("\n");
     for (auto row: board) {
@@ -46,12 +46,11 @@ auto inline get_column(vec<u32> &board, size_t ind) -> u32 {
 auto check_cols(Constraints &c, vec<u32> &board, pos_t current) -> bool {
     auto[row, cur_rc] = current;
 
-    assert (board.size() == c.size);
-    assert (row <= c.size);
+    assert (row <= c.row_count);
 
-    bool is_end = c.size == row;
+    bool is_end = c.row_count == row;
 
-    for (size_t i = 0; i < c.size; i++) {
+    for (size_t i = 0; i < c.col_count; i++) {
         u32 col = get_column(board, i);
 
         u32 start = 0;
@@ -77,7 +76,7 @@ auto check_cols(Constraints &c, vec<u32> &board, pos_t current) -> bool {
             auto check = [&]() -> ConstraintSatisfied {
                 auto has_constraint = ConstraintSatisfied::Missing;
 
-                for (size_t j = start; j <= c.size - static_cast<size_t>(constraint); j++) {
+                for (size_t j = start; j <= c.col_count - static_cast<size_t>(constraint); j++) {
                     u32 moved_mask = mask << j;
 
                     if ((moved_mask & col) != moved_mask) {
@@ -122,7 +121,7 @@ auto solve(Constraints &c, vec<u32> &possibles, vec<u32> &board, pos_t current) 
     if (!check_cols(c, board, current))
         return false;
 
-    if (row == board.size()) {
+    if (row == c.row_count) {
         return true;
     }
 
@@ -139,7 +138,7 @@ auto solve(Constraints &c, vec<u32> &possibles, vec<u32> &board, pos_t current) 
 
     auto constraint = row_reqs[constraint_ind];
 
-    u32 max = 1 << board.size();
+    u32 max = 1 << c.col_count;
 
     while (row_pos != 0) {
         // First possibility
