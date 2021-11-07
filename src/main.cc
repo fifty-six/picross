@@ -1,7 +1,6 @@
 #include <iostream>
 #include <span>
 #include <cstring>
-#include <vector>
 #include <fstream>
 #include <sstream>
 #include <chrono>
@@ -120,9 +119,17 @@ void test_cols() {
                 187, 646, 475, 910, 761, 507, 370, 149, 357, 587
         };
 
-        fmt::print("\n\n\n");
-        picross::print_board(invalid_board);
-        fmt::print("\n\n\n");
         assert(!check_cols(constraints, invalid_board, { 10, 0 }));
+        
+        auto solved = picross::solve(constraints);
+        
+        if (!solved) {
+            assert(false);
+            return;
+        }
+        
+        vec<u32> sol = { 742, 139, 947, 462, 761, 507, 314, 593, 709, 299 };
+        
+        assert(std::equal(solved->begin(), solved->end(), sol.begin(), sol.end()));
     }
 }

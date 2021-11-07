@@ -4,7 +4,6 @@
 #include "solver.h"
 
 #include "fmt/format.h"
-#include "fmt/ranges.h"
 
 namespace picross {
 
@@ -37,7 +36,6 @@ auto inline get_column(vec<u32> &board, size_t ind) -> u32 {
     u32 col = 0;
 
     size_t n = 0;
-    // size_t size = board.size();
     for (u32 row: board) {
         col |= (row & (1 << ind)) >> ind << n++;
     }
@@ -45,34 +43,40 @@ auto inline get_column(vec<u32> &board, size_t ind) -> u32 {
     return col;
 }
 
-auto check_cols_intermediate(Constraints &c, vec<u32> &board, pos_t current) {
+auto check_cols(Constraints &c, vec<u32> &board, pos_t current) -> bool {
     auto[row, cur_rc] = current;
 
     assert (board.size() == c.size);
+    assert (row <= c.size);
+
+    bool is_end = c.size == row;
 
     for (size_t i = 0; i < c.size; i++) {
         u32 col = get_column(board, i);
 
         u32 start = 0;
+        u32 sum = 0;
         for (auto constraint: c.cols[i]) {
-            if (row < constraint)
+            sum += constraint;
+
+            // No point in checking constraints that would go over the row requirement anyways
+            if (row < sum)
                 break;
 
-            // fmt::print("col: {:010b}, i: {}\n", col, i);
-            // fmt::print("c.col[i] = {}\n", c.cols[i]);
+            // Account for the blank after a constraint.
+            sum++;
 
             u32 mask = (1 << constraint) - 1;
 
-            // enum ConstraintSatisfied {
-            //     Satisfied,
-            //     
-            // };
+            enum class ConstraintSatisfied {
+                Satisfied,
+                Invalid,
+                Missing
+            };
 
-            auto check = [&]() -> i8 {
-                // bool has_constraint = false;
-                i8 has_constraint = 0;
+            auto check = [&]() -> ConstraintSatisfied {
+                auto has_constraint = ConstraintSatisfied::Missing;
 
-                // fmt::print("start = {} for constraint {}\n", start, constraint);
                 for (size_t j = start; j <= c.size - static_cast<size_t>(constraint); j++) {
                     u32 moved_mask = mask << j;
 
@@ -80,7 +84,7 @@ auto check_cols_intermediate(Constraints &c, vec<u32> &board, pos_t current) {
                         continue;
                     }
 
-                    has_constraint = -1;
+                    has_constraint = ConstraintSatisfied::Invalid;
 
                     // Put 1s on both sides of the mask 
                     u32 padding = (moved_mask << 1) | (moved_mask >> 1);
@@ -89,85 +93,23 @@ auto check_cols_intermediate(Constraints &c, vec<u32> &board, pos_t current) {
 
                     // Now check that those 1s aren't set.
                     if ((~padding & col) == col) {
-                        // fmt::print("{:010b} - c: {} completed.\n", col, constraint);
+                        // Bump up the start for the next constraint,
+                        // so that we don't double count.
                         start = static_cast<u32>(j + constraint);
-
-                        return 1;
+                        return ConstraintSatisfied::Satisfied;
                     }
-
-                    // fmt::print("found but not padded correctly {:010b} - c: {}\n", col, constraint);
                 }
 
                 return has_constraint;
             };
 
-            i8 checked = check();
+            auto checked = check();
 
-            if (checked == -1) {
-                // fmt::print("constraint {} for col {} failed\n", constraint, i);
+            if (checked == ConstraintSatisfied::Invalid || (checked == ConstraintSatisfied::Missing && is_end)) {
                 return false;
-            } else if (checked == 0) {
+            } else if (checked == ConstraintSatisfied::Missing) {
                 break;
             }
-        }
-    }
-
-    return true;
-}
-
-auto check_cols(Constraints &c, vec<u32> &board, pos_t current) -> bool {
-    auto[cur_row, cur_constraint] = current;
-
-    assert(cur_row <= board.size());
-
-    // for now
-    if (cur_row != board.size()) {
-        return check_cols_intermediate(c, board, current);
-    }
-
-    auto size = board.size();
-
-    for (size_t i = 0; i < board.size(); i++) {
-        u32 col = get_column(board, i);
-
-        auto col_c = c.cols[i];
-        
-        // fmt::print("col_c = {}\n", col_c);
-
-        u32 start = 0;
-        for (auto constraint: col_c) {
-            u32 mask = (1 << constraint) - 1;
-
-            auto check = [&]() {
-                for (size_t j = start; j <= size - static_cast<size_t>(constraint); j++) {
-                    u32 moved_mask = mask << j;
-
-                    if ((moved_mask & col) != moved_mask) {
-                        continue;
-                    }
-
-                    // Put 1s on both sides of the mask 
-                    u32 padding = (moved_mask << 1) | (moved_mask >> 1);
-                    // Now remove the mask from the int
-                    padding &= ~moved_mask;
-
-                    // Now check that those 1s aren't set.
-                    if ((~padding & col) == col) {
-                        start = static_cast<u32>(j + constraint);
-                        // fmt::print(
-                        //         "col {:10b}, mask {:10b}, padding {:10b}, constraint: {}, col_ind: {}\n",
-                        //         col, moved_mask, padding, constraint, i
-                        // );
-
-                        return true;
-                    }
-                }
-
-                return false;
-            };
-
-            if (!check())
-                return false;
         }
     }
 
@@ -181,10 +123,6 @@ auto solve(Constraints &c, vec<u32> &possibles, vec<u32> &board, pos_t current) 
         return false;
 
     if (row == board.size()) {
-        fmt::print("\n");
-        print_board(board);
-        fmt::print("\n");
-        fmt::print("{}\n", board);
         return true;
     }
 
@@ -200,11 +138,6 @@ auto solve(Constraints &c, vec<u32> &possibles, vec<u32> &board, pos_t current) 
     assert(constraint_ind < row_reqs.size());
 
     auto constraint = row_reqs[constraint_ind];
-
-    // fmt::print(
-    //         "(r, c) = ({}, {}), c: {}, row: {:015b}, possibilities: {}\n",
-    //         row, constraint_ind, constraint, orig_row, orig_pos
-    // );
 
     u32 max = 1 << board.size();
 
