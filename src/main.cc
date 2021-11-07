@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
         fmt::print(stderr, "Usage: {} [--test] | FILE\n", args[0]);
         return 1;
     }
-    
+
     if (args.size() == 2 && std::string_view(args[1]) == "--test") {
         test_cols();
         return 0;
@@ -88,9 +88,41 @@ void test_cols() {
     }
 
     {
-        // picross::Constraints constraints {
-        //     10,
-        //     {{ }}
-        // }
+        picross::Constraints constraints {
+                10,
+                {{ 2, 2 }, { 1, 1, 1 }, { 1, 4, 1 }, { 1, 1, 4 }, { 2, 2, 1 }, { 1, 2, 2, 1 }, { 3, 2 }, { 1, 3, 2 }, { 2, 1, 2 }, { 3, 1, 1, 1 }},
+                {{ 3, 3 }, { 3, 2 }, { 1, 2, 1 }, { 2, 3 }, { 1, 1, 1, 1, 1 }, { 1, 1, 1 }, { 5, 2 }, { 1, 3 }, { 1, 1, 3 }, { 6, 2 }}
+        };
+
+        vec<u32> valid_board = {
+                0b1100110000,
+                0b1001000001,
+                0b1001111001,
+                0b1111001001,
+                0b1001100110,
+                0b1011011010,
+                0b0110001110,
+                0b0110011101,
+                0b1101000011,
+                0b1001010111
+        };
+
+        assert(check_cols(constraints, valid_board, { 10, 0 }));
+    }
+    {
+        picross::Constraints constraints {
+                10,
+                {{ 2, 3, 1 }, { 2, 1, 1 }, { 2, 2, 3 }, { 3, 3 }, { 1, 5, 1 }, { 2, 6 }, { 1, 3, 1 }, { 1, 1, 1, 1 }, { 1, 1, 2, 1 }, { 2, 1, 1, 1 }},
+                {{ 2, 2, 3 }, { 4, 2, 1 }, { 1, 1, 1 }, { 1, 4, 1 }, { 1, 4 }, { 1, 1, 3, 1 }, { 1, 3, 2 }, { 6, 1 }, { 2, 2, 1 }, { 1, 1, 1, 2 }}
+        };
+
+        vec<u32> invalid_board = {
+                187, 646, 475, 910, 761, 507, 370, 149, 357, 587
+        };
+
+        fmt::print("\n\n\n");
+        picross::print_board(invalid_board);
+        fmt::print("\n\n\n");
+        assert(!check_cols(constraints, invalid_board, { 10, 0 }));
     }
 }
