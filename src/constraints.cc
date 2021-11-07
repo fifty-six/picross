@@ -23,8 +23,8 @@ Constraints::Constraints(
         vec<vec<u32>> &&cols_
 )
         : row_count(row_count_), col_count(col_count_), rows(rows_), cols(cols_) {
-    assert(rows.size() == static_cast<size_t>(row_size));
-    assert(cols.size() == static_cast<size_t>(col_size));
+    assert(rows.size() == static_cast<size_t>(row_count_));
+    assert(cols.size() == static_cast<size_t>(col_count_));
 }
 
 tl::expected<Constraints, std::string> read_file(std::string const &name) {

@@ -56,6 +56,9 @@ auto check_cols(Constraints &c, vec<u32> &board, pos_t current) -> bool {
         u32 start = 0;
         u32 sum = 0;
         for (auto constraint: c.cols[i]) {
+            if (constraint == 0)
+                break;
+            
             sum += constraint;
 
             // No point in checking constraints that would go over the row requirement anyways
@@ -76,7 +79,7 @@ auto check_cols(Constraints &c, vec<u32> &board, pos_t current) -> bool {
             auto check = [&]() -> ConstraintSatisfied {
                 auto has_constraint = ConstraintSatisfied::Missing;
 
-                for (size_t j = start; j <= c.col_count - static_cast<size_t>(constraint); j++) {
+                for (size_t j = start; j <= c.row_count - static_cast<size_t>(constraint); j++) {
                     u32 moved_mask = mask << j;
 
                     if ((moved_mask & col) != moved_mask) {
@@ -134,7 +137,11 @@ auto solve(Constraints &c, vec<u32> &possibles, vec<u32> &board, pos_t current) 
     // Can't *start* where others already are
     row_pos &= ~orig_row;
 
-    assert(constraint_ind < row_reqs.size());
+    assert(constraint_ind < row_reqs.size() || row_reqs.empty());
+    
+    if (row_reqs.empty()) {
+        return solve(c, possibles, board, { row + 1, 0 });
+    }
 
     auto constraint = row_reqs[constraint_ind];
 
