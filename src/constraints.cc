@@ -18,8 +18,8 @@ namespace picross {
 
 Constraints::Constraints(
         size_t size,
-        vec<vec<int>> &&rows_,
-        vec<vec<int>> &&cols_
+        vec<vec<u32>> &&rows_,
+        vec<vec<u32>> &&cols_
 )
         : size(size), rows(rows_), cols(cols_) {
     assert(rows.size() == static_cast<size_t>(size));
@@ -38,8 +38,8 @@ tl::expected<Constraints, std::string> read_file(std::string const &name) {
 
     file >> size;
 
-    vec<vec<int>> rows;
-    vec<vec<int>> cols;
+    vec<vec<u32>> rows;
+    vec<vec<u32>> cols;
 
     rows.reserve(size);
     cols.reserve(size);
@@ -52,7 +52,7 @@ tl::expected<Constraints, std::string> read_file(std::string const &name) {
 
     while (file.good()) {
         // Read n of size for rows, then cols.
-        vec<vec<int>> &current = n >= size
+        vec<vec<u32>> &current = n >= size
                                  ? cols
                                  : rows;
 
@@ -64,22 +64,22 @@ tl::expected<Constraints, std::string> read_file(std::string const &name) {
 
         std::stringstream l_stream(line);
 
-        vec<int> line_vec;
+        vec<u32> line_vec;
         std::string num;
 
         // Process line for our row/col constraints
         while (l_stream.good()) {
             std::getline(l_stream, num, ' ');
 
-            size_t res;
+            u32 res;
 
             auto[ptr, ec] = std::from_chars(num.data(), num.data() + num.size(), res);
 
             if (ec != std::errc()) {
-                return tl::unexpected(fmt::format("{} while parsing {}", std::make_error_code(ec).message(), num));
+                return tl::unexpected(fmt::format("{} while parsing \"{}\"", std::make_error_code(ec).message(), num));
             }
 
-            line_vec.push_back(static_cast<int>(res));
+            line_vec.push_back(res);
         }
 
         current.push_back(std::move(line_vec));

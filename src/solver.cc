@@ -33,25 +33,101 @@ void print_board(vec<u32> &board) {
     fmt::print("\n");
 }
 
+auto inline get_column(vec<u32> &board, size_t ind) -> u32 {
+    u32 col = 0;
+
+    size_t n = 0;
+    for (u32 row: board) {
+        col |= (row & (1 << ind)) >> ind << n++;
+    }
+
+    return col;
+}
+
+auto check_cols_intermediate(Constraints &c, vec<u32> &board, pos_t current) {
+    auto [row, cur_rc] = current;
+    
+    assert (board.size() == c.size);
+    
+    for (size_t i = 0; i < c.size; i++) {
+        u32 col = get_column(board, i);
+        
+        u32 start = 0;
+        for (auto constraint: c.cols[i]) {
+            if (row < constraint)
+                break;
+
+            // fmt::print("col: {:010b}, i: {}\n", col, i);
+            // fmt::print("c.col[i] = {}\n", c.cols[i]);
+            
+            u32 mask = (1 << constraint) - 1;
+            
+            // enum ConstraintSatisfied {
+            //     Satisfied,
+            //     
+            // };
+
+            auto check = [&]() -> i8 {
+                // bool has_constraint = false;
+                i8 has_constraint = 0;
+                
+                // fmt::print("start = {} for constraint {}\n", start, constraint);
+                for (size_t j = start; j <= c.size - static_cast<size_t>(constraint); j++) {
+                    u32 moved_mask = mask << j;
+
+                    if ((moved_mask & col) != moved_mask) {
+                        continue;
+                    }
+                    
+                    has_constraint = -1;
+
+                    // Put 1s on both sides of the mask 
+                    u32 padding = (moved_mask << 1) | (moved_mask >> 1);
+                    // Now remove the mask from the int
+                    padding &= ~moved_mask;
+
+                    // Now check that those 1s aren't set.
+                    if ((~padding & col) == col) {
+                        // fmt::print("{:010b} - c: {} completed.\n", col, constraint);
+                        start = static_cast<u32>(j + constraint);
+                        
+                        return 1;
+                    }
+                    
+                    // fmt::print("found but not padded correctly {:010b} - c: {}\n", col, constraint);
+                }
+
+                return has_constraint;
+            };
+            
+            i8 checked = check();
+            
+            if (checked == -1) {
+                // fmt::print("constraint {} for col {} failed\n", constraint, i);
+                return false;
+            } else if (checked == 0) {
+                break;
+            }
+        }
+    }
+    
+    return true;
+}
+
 auto check_cols(Constraints &c, vec<u32> &board, pos_t current) -> bool {
     auto[cur_row, cur_constraint] = current;
 
-    assert (cur_row <= board.size());
+    assert(cur_row <= board.size());
 
     // for now
     if (cur_row != board.size()) {
-        return true;
+        return check_cols_intermediate(c, board, current);
     }
 
     auto size = board.size();
 
     for (size_t i = 0; i < board.size(); i++) {
-        u32 col = 0;
-
-        size_t n = 0;
-        for (u32 row: board) {
-            col |= (row & (1 << i)) >> i << n++;
-        }
+        u32 col = get_column(board, i);
 
         auto col_c = c.cols[i];
 
@@ -66,16 +142,13 @@ auto check_cols(Constraints &c, vec<u32> &board, pos_t current) -> bool {
                         continue;
                     }
 
-                    // Put 1s on both sides of the mask
+                    // Put 1s on both sides of the mask 
                     u32 padding = (moved_mask << 1) | (moved_mask >> 1);
-
                     // Now remove the mask from the int
                     padding &= ~moved_mask;
 
-                    // Everything but what we don't want set
-                    u32 neg_mask = ~padding;
-
-                    if ((neg_mask & col) == col)
+                    // Now check that those 1s aren't set.
+                    if ((~padding & col) == col)
                         return true;
                 }
 
@@ -101,7 +174,7 @@ auto solve(Constraints &c, vec<u32> &possibles, vec<u32> &board, pos_t current) 
         return true;
     }
 
-    vec<int> &row_reqs = c.rows[row];
+    vec<u32> &row_reqs = c.rows[row];
     u32 orig_row = board[row];
 
     u32 &row_pos = possibles[row];

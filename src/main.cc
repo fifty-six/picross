@@ -67,21 +67,30 @@ int main(int argc, char **argv) {
 }
 
 void test_cols() {
-    picross::Constraints constraints {
-            5,
-            {{ 2, 2 }, { 3 }, { 1, 1 }, { 1, 1 }, { 1, 1 }},
-            {{ 4 }, { 2, 1 }, { 2 }, { 1 }, { 1, 2 }}
-    };
+    {
+        picross::Constraints constraints {
+                5,
+                {{ 2, 2 }, { 3 }, { 1, 1 }, { 1, 1 }, { 1, 1 }},
+                {{ 4 }, { 2, 1 }, { 2 }, { 1 }, { 1, 2 }}
+        };
 
-    // Note the board looks backwards because
-    // we reverse the output on each row.
-    vec<u32> board = {
-            0b11011,
-            0b00111,
-            0b00101,
-            0b10001,
-            0b10010
-    };
+        // Note the board looks backwards because
+        // we reverse the output on each row.
+        vec<u32> board = {
+                0b11011,
+                0b00111,
+                0b00101,
+                0b10001,
+                0b10010
+        };
 
-    assert(check_cols(constraints, board, { 5, 1 }));
+        assert(check_cols(constraints, board, { 5, 1 }));
+    }
+
+    {
+        // picross::Constraints constraints {
+        //     10,
+        //     {{ }}
+        // }
+    }
 }

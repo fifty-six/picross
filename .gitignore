@@ -1,6 +1,8 @@
 .xmake
 .idea
 
+out*
+
 # Build
 cmake-build-debug
 build
