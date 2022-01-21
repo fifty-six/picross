@@ -1,10 +1,5 @@
-#include <iostream>
 #include <span>
-#include <cstring>
-#include <fstream>
-#include <sstream>
 #include <chrono>
-#include <cassert>
 
 #include <fmt/core.h>
 #include <fmt/compile.h>
@@ -37,7 +32,7 @@ int main(int argc, char **argv) {
     auto constraints = read_file(file_name);
 
     if (!constraints) {
-        fmt::print(stderr, fmt::emphasis::bold | fg(fmt::color::crimson), "{}\n", constraints.error());
+        fmt::print(stderr, fmt::emphasis::bold | fg(fmt::color::crimson), "{}\n", constraints.error().message());
         return 1;
     }
 

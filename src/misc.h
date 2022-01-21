@@ -9,6 +9,8 @@ using vec = std::vector<T>;
 
 using pos_t = std::tuple<size_t, size_t>;
 
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+
 using u8  [[maybe_unused]] = uint8_t;
 using u16 [[maybe_unused]] = uint16_t;
 using u32 [[maybe_unused]] = uint32_t;

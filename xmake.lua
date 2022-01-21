@@ -8,6 +8,7 @@ add_rules("mode.debug", "mode.release")
 
 -- packages
 add_requires("fmt 8")
+add_requires("tl-ranges")
 add_requires("tl_expected 1.0.0")
 
 set_warnings("allextra")
@@ -39,9 +40,7 @@ warnings = {
     "-Wcomma"
 }
 
-for _, w in pairs(warnings) do
-    add_cxflags(w)
-end
+add_cxflags(table.unpack(warnings))
 
 if is_mode("debug") then
     add_defines("DEBUG")
@@ -72,3 +71,4 @@ target("picross")
 
     add_packages("fmt")
     add_packages("tl_expected")
+    add_packages("tl-ranges")

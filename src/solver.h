@@ -1,7 +1,7 @@
 #pragma once
 
 #include <optional>
-#include "aliases.h"
+#include "misc.h"
 #include "constraints.h"
 
 namespace picross {
