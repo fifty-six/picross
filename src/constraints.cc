@@ -23,15 +23,9 @@
 namespace picross {
 
 Constraints::Constraints(
-        u32 row_count_,
-        u32 col_count_,
         vec<vec<u32>> &&rows_,
         vec<vec<u32>> &&cols_
-)
-        : row_count(row_count_), col_count(col_count_), rows(std::move(rows_)), cols(std::move(cols_)) {
-    assert(rows.size() == static_cast<size_t>(row_count_));
-    assert(cols.size() == static_cast<size_t>(col_count_));
-}
+) : row_count(rows_.size()), col_count(cols_.size()), rows(std::move(rows_)), cols(std::move(cols_)) {}
 
 auto ParseError::message() -> std::string {
     return fmt::format("err: {{{}}} while parsing {}", code.message(), line);
@@ -128,7 +122,7 @@ tl::expected<Constraints, ReadError> read_file(std::string const &name) {
         current.push_back(std::move(line_vec));
     }
 
-    return Constraints{row_count, col_count, std::move(rows), std::move(cols)};
+    return Constraints { std::move(rows), std::move(cols) };
 }
 
 }

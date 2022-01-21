@@ -15,7 +15,7 @@ struct Constraints {
     vec<vec<u32>> rows;
     vec<vec<u32>> cols;
 
-    explicit Constraints(u32 row_count, u32 col_count, vec<vec<u32>> &&rows, vec<vec<u32>> &&cols);
+    explicit Constraints(vec<vec<u32>> &&rows, vec<vec<u32>> &&cols);
 };
 
 struct ParseError {
