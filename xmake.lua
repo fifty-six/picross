@@ -7,8 +7,8 @@ set_languages("cxx20")
 add_rules("mode.debug", "mode.release")
 
 -- packages
-add_requires("fmt 8")
-add_requires("tl-ranges")
+add_requires("fmt 8.0.0")
+add_requires("vcpkg::tl-ranges")
 add_requires("tl_expected 1.0.0")
 
 set_warnings("allextra")
