@@ -1,7 +1,13 @@
 set_xmakever("2.5.1")
 
 set_project("picross")
-set_languages("cxx20")
+
+-- need cxxlatest for windows
+if is_plat("windows") then
+    set_languages("cxxlatest")
+else
+    set_languages("cxx20")
+end
 
 -- modes
 add_rules("mode.debug", "mode.release")
@@ -71,4 +77,4 @@ target("picross")
 
     add_packages("fmt")
     add_packages("tl_expected")
-    add_packages("tl-ranges")
+    add_packages("vcpkg::tl-ranges")
