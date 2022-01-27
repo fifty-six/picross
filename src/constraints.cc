@@ -34,7 +34,7 @@ auto ParseError::message() -> std::string {
 auto ReadError::message() -> std::string {
     return std::visit(overloaded{
             [](std::errc err) {
-                return std::move(std::make_error_code(err).message());
+                return std::make_error_code(err).message();
             },
             [](ParseError p_err) {
                 return p_err.message();
@@ -60,7 +60,9 @@ tl::expected<Constraints, ReadError> read_file(std::string const &name) {
             return tl::unexpected(ParseError(ec, num));
         }
 
-        return std::make_pair(out, std::string_view(ptr, &num.back() - ptr + 1));
+        auto size = static_cast<usize>(&num.back() - ptr) + 1;
+
+        return std::make_pair(out, std::string_view(ptr, size));
     };
 
     u32 row_count, col_count;
